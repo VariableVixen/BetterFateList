@@ -1,0 +1,13 @@
+{
+	"Author": "VariableVixen",
+	"Name": "BetterFateList",
+	"Description": "Provides a list of all FATEs in the current zone, with their type, sorted by maximum level and distance from you.",
+	"RepoUrl": "https://github.com/VariableVixen/BetterFateList",
+	"Punchline": "Because the vanilla FATE list kinda sucks.",
+	"ApplicableVersion": "any",
+	"LoadPriority": 0,
+	"Tags": [
+		"fate"
+	],
+	"DalamudApiLevel": 12
+}
