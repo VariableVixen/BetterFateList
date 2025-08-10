@@ -2,7 +2,7 @@
 <Project Sdk="Dalamud.NET.Sdk/13.0.0">
 	<PropertyGroup>
 		<Product>BetterFateList</Product>
-		<Version>1.0.0</Version>
+		<Version>1.0.1</Version>
 		<Description>Provides a list of FATEs in the current zone, sorted first by level and then by distance, with more information displayed.</Description>
 		<Copyright>Copyleft VariableVixen 2025</Copyright>
 	</PropertyGroup>
