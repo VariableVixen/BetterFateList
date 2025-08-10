@@ -2,12 +2,11 @@ using System;
 using System.Numerics;
 using System.Reflection;
 
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
-
-using ImGuiNET;
 
 using Lumina.Excel.Sheets;
 
@@ -89,7 +88,7 @@ internal class Plugin: IDalamudPlugin {
 		Map? map = Service.Lumina.GetExcelSheet<TerritoryType>()?.GetRowOrDefault(zone)?.Map.Value;
 		if (map is null)
 			return;
-		uiMap->IsFlagMarkerSet = false;
+		uiMap->FlagMarkerCount = 0;
 		uiMap->SetFlagMapMarker(zone, map.Value.RowId, worldPos);
 		if (ImGui.IsKeyDown(ImGuiKey.ModShift)) {
 			uiMap->AgentInterface.Hide();
