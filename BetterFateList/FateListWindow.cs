@@ -46,12 +46,12 @@ internal class FateListWindow: Window {
 			this.Flags &= ~LOCKED_FLAGS;
 	}
 
-	public override bool DrawConditions() => base.DrawConditions() && Service.Client?.LocalContentId is not (null or 0);
+	public override bool DrawConditions() => base.DrawConditions() && Service.PlayerState.ContentId is not 0;
 
 	public override void Draw() {
 		bool anyFates = false;
 
-		IPlayerCharacter player = Service.Client.LocalPlayer!;
+		IPlayerCharacter player = Service.ObjectTable.LocalPlayer!;
 		Vector3 here = player.Position;
 		byte level = player.Level;
 		IEnumerable<IFate> fates = Service.Fates

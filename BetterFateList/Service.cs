@@ -14,4 +14,6 @@ internal class Service {
 	[PluginService] public static IDataManager Lumina { get; private set; } = null!;
 	[PluginService] public static ICommandManager Commands { get; private set; } = null!;
 	[PluginService] public static IFateTable Fates { get; private set; } = null!;
+	[PluginService] public static IPlayerState PlayerState { get; private set; } = null!;
+	[PluginService] public static IObjectTable ObjectTable { get; private set; } = null!;
 }
