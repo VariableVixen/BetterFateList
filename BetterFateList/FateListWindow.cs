@@ -55,7 +55,7 @@ internal class FateListWindow: Window {
 		Vector3 here = player.Position;
 		byte level = player.Level;
 		IEnumerable<IFate> fates = Service.Fates
-			.Where(fate => fate is not null && (fate.State is FateState.Preparation || (fate.State is FateState.Running && fate.TimeRemaining >= 0)))
+			.Where(fate => fate is not null && (fate.State is FateState.Preparing || (fate.State is FateState.Running && fate.TimeRemaining >= 0)))
 			.OrderByDescending(fate => fate.MaxLevel)
 			.ThenBy(fate => Vector3.Distance(fate.Position, here))
 			.ToArray();
@@ -141,7 +141,7 @@ internal class FateListWindow: Window {
 			ImGui.Indent();
 			ImGui.BeginDisabled();
 			ImGui.TextUnformatted($"{fate.TypeLabel()}, {MathF.Max(0, MathF.Round(Vector3.Distance(fate.Position, here), MidpointRounding.ToZero))} yalms");
-			if (fate.State is FateState.Preparation)
+			if (fate.State is FateState.Preparing)
 				ImGui.TextUnformatted("awaiting start");
 			else
 				ImGui.TextUnformatted($"{clockTime(fate.TimeRemaining)} remaining, {fate.Progress}% complete");
