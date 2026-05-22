@@ -49,7 +49,6 @@ internal class FateListWindow: Window {
 	public override bool DrawConditions() => base.DrawConditions() && Service.PlayerState.ContentId is not 0;
 
 	public override void Draw() {
-		bool anyFates = false;
 
 		IPlayerCharacter player = Service.ObjectTable.LocalPlayer!;
 		Vector3 here = player.Position;
@@ -60,100 +59,102 @@ internal class FateListWindow: Window {
 			.ThenBy(fate => Vector3.Distance(fate.Position, here))
 			.ToArray();
 
-		byte lastMaxLevel = fates.First().MaxLevel;
-		foreach (IFate fate in fates) {
-			anyFates = true;
+		if (fates.Any()) {
 
-			string levelLabel = $"{fate.Level}/{fate.MaxLevel}";
-			float levelWidth = ImGui.CalcTextSize(levelLabel).X;
-			float offset = ImGui.GetWindowWidth() - ImGui.GetStyle().WindowPadding.X - levelWidth;
+			byte lastMaxLevel = fates.First().MaxLevel;
+			foreach (IFate fate in fates) {
 
-			if (lastMaxLevel != fate.MaxLevel) {
-				ImGui.Separator();
-				ImGui.Spacing();
-				ImGui.Spacing();
-				lastMaxLevel = fate.MaxLevel;
-			}
+				string levelLabel = $"{fate.Level}/{fate.MaxLevel}";
+				float levelWidth = ImGui.CalcTextSize(levelLabel).X;
+				float offset = ImGui.GetWindowWidth() - ImGui.GetStyle().WindowPadding.X - levelWidth;
 
-			if (fate.HasBonus)
-				ImGui.PushStyleColor(ImGuiCol.Text, fateHasXpBonus);
-			if (ImGui.SmallButton(fate.Name.TextValue)) {
-				Plugin.SetLocalMapMarker(fate.Position);
-			}
-			if (fate.HasBonus)
-				ImGui.PopStyleColor();
+				if (lastMaxLevel != fate.MaxLevel) {
+					ImGui.Separator();
+					ImGui.Spacing();
+					ImGui.Spacing();
+					lastMaxLevel = fate.MaxLevel;
+				}
 
-			if (ImGui.IsItemHovered()) {
-				ImGui.BeginTooltip();
-				ImGui.PushTextWrapPos(this.SizeConstraints!.Value.MaximumSize.X);
+				if (fate.HasBonus)
+					ImGui.PushStyleColor(ImGuiCol.Text, fateHasXpBonus);
+				if (ImGui.SmallButton(fate.Name.TextValue)) {
+					Plugin.SetLocalMapMarker(fate.Position);
+				}
+				if (fate.HasBonus)
+					ImGui.PopStyleColor();
+
+				if (ImGui.IsItemHovered()) {
+					ImGui.BeginTooltip();
+					ImGui.PushTextWrapPos(this.SizeConstraints!.Value.MaximumSize.X);
+					ImGui.BeginDisabled();
+					ImGui.TextUnformatted("Click to set your flag. Hold shift to open your map.");
+					ImGui.EndDisabled();
+					ImGui.TextUnformatted(fate.Description.TextValue);
+					ImGui.PopTextWrapPos();
+					ImGui.EndTooltip();
+				}
+
+				ImGui.SameLine(offset);
+				if (level < fate.Level) {
+					ImGui.PushStyleColor(ImGuiCol.Text, levelTooLow);
+					ImGui.TextUnformatted(levelLabel);
+					ImGui.PopStyleColor();
+					if (ImGui.IsItemHovered()) {
+						ImGui.BeginTooltip();
+						ImGui.PushTextWrapPos(this.SizeConstraints!.Value.MinimumSize.X);
+						ImGui.TextUnformatted("This FATE is above your level.");
+						ImGui.BeginDisabled();
+						ImGui.TextUnformatted("It will be more difficult, and your rewards will be reduced.");
+						ImGui.EndDisabled();
+						ImGui.PopTextWrapPos();
+						ImGui.EndTooltip();
+					}
+				}
+				else if (level > fate.MaxLevel) {
+					ImGui.PushStyleColor(ImGuiCol.Text, levelTooHigh);
+					ImGui.TextUnformatted(levelLabel);
+					ImGui.PopStyleColor();
+					if (ImGui.IsItemHovered()) {
+						ImGui.BeginTooltip();
+						ImGui.PushTextWrapPos(this.SizeConstraints!.Value.MinimumSize.X);
+						ImGui.TextUnformatted("This FATE is below your level.");
+						ImGui.BeginDisabled();
+						ImGui.TextUnformatted("You will need to remember to sync down, and will lose some actions.");
+						ImGui.EndDisabled();
+						ImGui.PopTextWrapPos();
+						ImGui.EndTooltip();
+					}
+				}
+				else {
+					ImGui.PushStyleColor(ImGuiCol.Text, levelInRange);
+					ImGui.TextUnformatted(levelLabel);
+					ImGui.PopStyleColor();
+					if (ImGui.IsItemHovered()) {
+						ImGui.BeginTooltip();
+						ImGui.PushTextWrapPos(this.SizeConstraints!.Value.MinimumSize.X);
+						ImGui.TextUnformatted("This FATE is at your level.");
+						ImGui.PopTextWrapPos();
+						ImGui.EndTooltip();
+					}
+				}
+
+				ImGui.Indent();
 				ImGui.BeginDisabled();
-				ImGui.TextUnformatted("Click to set your flag. Hold shift to open your map.");
+				ImGui.TextUnformatted($"{fate.TypeLabel()}, {MathF.Max(0, MathF.Round(Vector3.Distance(fate.Position, here), MidpointRounding.ToZero))} yalms");
+				if (fate.State is FateState.Preparing)
+					ImGui.TextUnformatted("awaiting start");
+				else
+					ImGui.TextUnformatted($"{clockTime(fate.TimeRemaining)} remaining, {fate.Progress}% complete");
 				ImGui.EndDisabled();
-				ImGui.TextUnformatted(fate.Description.TextValue);
-				ImGui.PopTextWrapPos();
-				ImGui.EndTooltip();
+				ImGui.Unindent();
+
+				ImGui.Spacing();
+				ImGui.Spacing();
+				ImGui.Spacing();
 			}
 
-			ImGui.SameLine(offset);
-			if (level < fate.Level) {
-				ImGui.PushStyleColor(ImGuiCol.Text, levelTooLow);
-				ImGui.TextUnformatted(levelLabel);
-				ImGui.PopStyleColor();
-				if (ImGui.IsItemHovered()) {
-					ImGui.BeginTooltip();
-					ImGui.PushTextWrapPos(this.SizeConstraints!.Value.MinimumSize.X);
-					ImGui.TextUnformatted("This FATE is above your level.");
-					ImGui.BeginDisabled();
-					ImGui.TextUnformatted("It will be more difficult, and your rewards will be reduced.");
-					ImGui.EndDisabled();
-					ImGui.PopTextWrapPos();
-					ImGui.EndTooltip();
-				}
-			}
-			else if (level > fate.MaxLevel) {
-				ImGui.PushStyleColor(ImGuiCol.Text, levelTooHigh);
-				ImGui.TextUnformatted(levelLabel);
-				ImGui.PopStyleColor();
-				if (ImGui.IsItemHovered()) {
-					ImGui.BeginTooltip();
-					ImGui.PushTextWrapPos(this.SizeConstraints!.Value.MinimumSize.X);
-					ImGui.TextUnformatted("This FATE is below your level.");
-					ImGui.BeginDisabled();
-					ImGui.TextUnformatted("You will need to remember to sync down, and will lose some actions.");
-					ImGui.EndDisabled();
-					ImGui.PopTextWrapPos();
-					ImGui.EndTooltip();
-				}
-			}
-			else {
-				ImGui.PushStyleColor(ImGuiCol.Text, levelInRange);
-				ImGui.TextUnformatted(levelLabel);
-				ImGui.PopStyleColor();
-				if (ImGui.IsItemHovered()) {
-					ImGui.BeginTooltip();
-					ImGui.PushTextWrapPos(this.SizeConstraints!.Value.MinimumSize.X);
-					ImGui.TextUnformatted("This FATE is at your level.");
-					ImGui.PopTextWrapPos();
-					ImGui.EndTooltip();
-				}
-			}
-
-			ImGui.Indent();
-			ImGui.BeginDisabled();
-			ImGui.TextUnformatted($"{fate.TypeLabel()}, {MathF.Max(0, MathF.Round(Vector3.Distance(fate.Position, here), MidpointRounding.ToZero))} yalms");
-			if (fate.State is FateState.Preparing)
-				ImGui.TextUnformatted("awaiting start");
-			else
-				ImGui.TextUnformatted($"{clockTime(fate.TimeRemaining)} remaining, {fate.Progress}% complete");
-			ImGui.EndDisabled();
-			ImGui.Unindent();
-
-			ImGui.Spacing();
-			ImGui.Spacing();
-			ImGui.Spacing();
 		}
-
-		if (!anyFates) {
+		else {
 			ImGui.BeginDisabled();
 			ImGui.TextUnformatted("Waiting for FATEs...");
 			ImGui.EndDisabled();
